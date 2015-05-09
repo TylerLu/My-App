@@ -7,12 +7,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.io.IOException;
-
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class MainActivity extends Activity {
 
     TextView defaultTextView;
+    GraphView graphView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +22,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         defaultTextView = (TextView)findViewById(R.id.defaultTextView);
+        graphView = (GraphView) findViewById(R.id.graphView);
 
         new GetUSDExchangeRatesTask().execute();
     }
@@ -56,8 +59,21 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(ExchangeRate[] exchangeRates) {
              if(exchangeRates.length > 0) {
-                float rate = exchangeRates[0].getValue();
-                defaultTextView.setText(Float.toString(rate));
+                 float rate = exchangeRates[0].getValue();
+                 defaultTextView.setText(Float.toString(rate));
+
+                 DataPoint[] array = new DataPoint[exchangeRates.length];
+                 for (int i = 0; i < array.length; i++) {
+                     ExchangeRate r = exchangeRates[i];
+                     array[i] = new DataPoint(i, r.getValue());
+                 }
+
+                 LineGraphSeries<DataPoint> series = new LineGraphSeries<>(array);
+                 graphView.addSeries(series);
+
+                 graphView.getViewport().setYAxisBoundsManual(true);
+                 graphView.getViewport().setMinY(610);
+                 graphView.getViewport().setMaxY(630);
             }
         }
     }
